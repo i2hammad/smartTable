@@ -287,8 +287,10 @@ public class SmartTable<T> extends View implements OnTableChangeListener {
                     postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            provider.reset();
-                            postInvalidate();
+                            if (provider != null) {
+                                provider.reset();
+                                postInvalidate();
+                            }
                         }
                     }, 0);
                 }

@@ -1,8 +1,4 @@
 apply plugin: 'com.android.library'
-//apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'maven-publish'
-
-group='com.github.wbwidget'
 
 android {
     compileSdkVersion 25
@@ -27,21 +23,14 @@ android {
 // https://developer.android.com/studio/build/maven-publish-plugin?hl=zh-cn
 // https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:publications
 // ./gradlew publish
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                groupId 'com.wbroker.widget'
-                artifactId 'SmartTable'
-                version '1.0.0'
-                from components.release
-            }
-        }
-        repositories {
-            maven { url uri("$rootDir/repo") }
-        }
-    }
+ext {
+    publishVersion = '1.1'
+    publishGroup = "wb.lib"
+    moduleName = 'SmartTable'
+    descContent = 'SmartTable'
 }
+
+apply from: '../gradle/publishing_maven.gradle'
 
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"

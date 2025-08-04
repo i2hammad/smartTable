@@ -1,0 +1,41 @@
+apply plugin: 'maven-publish'
+version = publishVersion
+group = publishGroup
+// https://developer.android.com/studio/build/maven-publish-plugin?hl=zh-cn
+// https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:publications
+ext{
+    localProps = new Properties()
+    isGpp =  project.properties.get("MobSDK.spEdition") == "GPP"
+    if(project.rootProject.file('local.properties').exists()){
+        project.rootProject.file('local.properties').withInputStream { stream ->
+            localProps.load(stream)
+        }
+    }
+    //获取本地定义的变量
+    getLocalEnv = { key->
+        return localProps.get(key) ?: System.getenv(key) // 优先返回属性文件的值，否则返回环境变量
+    }
+}
+afterEvaluate {
+    publishing{
+        publications{
+            release(MavenPublication){
+                groupId publishGroup
+                artifactId moduleName
+                version publishVersion
+                from components.release
+            }
+        }
+        repositories {
+            maven {
+                allowInsecureProtocol = true
+                // change to point to your repo, e.g. http://my.org/repo
+                url = "http://172.16.100.88:30081/repository/maven-android-release"
+                credentials {
+                    username getLocalEnv("WB_REPO_USER")
+                    password getLocalEnv("WB_REPO_PWD")
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,1 @@
+./gradlew -s :form:publish

@@ -9,10 +9,14 @@ import com.bin.david.form.data.column.ArrayColumn;
 import com.bin.david.form.data.Cell;
 import com.bin.david.form.data.column.Column;
 import com.bin.david.form.data.column.ColumnInfo;
+import com.bin.david.form.data.format.title.ITitleDrawFormat;
 import com.bin.david.form.data.table.TableData;
 import com.bin.david.form.data.TableInfo;
 import com.bin.david.form.utils.DrawUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**表格测量器
@@ -148,52 +152,58 @@ public class TableMeasurer<T> {
         int[] lineHeightArray = tableData.getTableInfo().getLineHeightArray();
         TableInfo tableInfo = tableData.getTableInfo();
         int currentPosition,size;
-        for(Column column:tableData.getChildColumns()){
-            float columnNameWidth =tableData.getTitleDrawFormat().measureWidth(column,config)
-                    +config.getColumnTitleHorizontalPadding()*2;
-            int columnWidth =0;
-             size = column.getDatas().size();
-            currentPosition=0;
-            boolean isArrayColumn = column instanceof ArrayColumn;
-            Cell[][] rangeCells = tableData.getTableInfo().getRangeCells();
-            for(int position = 0;position < size;position++) {
-                int width = column.getDrawFormat().measureWidth(column, position, config);
-                measureRowHeight(config, lineHeightArray, column, currentPosition, position);
-                int skipPosition = tableInfo.getSeizeCellSize(column, position);
-                currentPosition += skipPosition;
-                /**
-                 *Todo 为了解决合并单元宽度过大问题
-                 */
-                if (!isArrayColumn) {
-                    if(rangeCells !=null) {
-                        Cell cell = rangeCells[position][columnPos];
-                        if (cell != null) {
-                            if (cell.row != Cell.INVALID && cell.col != Cell.INVALID) {
-                                cell.width = width;
-                                width = width / cell.col;
-                            } else if (cell.realCell != null) {
-                                width = cell.realCell.width / cell.realCell.col;
-                            }
+        ArrayList<Column> childColumns = new ArrayList<>();
+        childColumns.addAll(tableData.getChildColumns());
+        ITitleDrawFormat titleDrawFormat = tableData.getTitleDrawFormat();
+        if (titleDrawFormat != null) {
+            for(Column column: childColumns){
+                float columnNameWidth = titleDrawFormat.measureWidth(column,config)
+                        +config.getColumnTitleHorizontalPadding()*2;
+                int columnWidth =0;
+                size = column.getDatas().size();
+                currentPosition=0;
+                boolean isArrayColumn = column instanceof ArrayColumn;
+                Cell[][] rangeCells = tableData.getTableInfo().getRangeCells();
+                for(int position = 0;position < size;position++) {
+                    int width = column.getDrawFormat().measureWidth(column, position, config);
+                    measureRowHeight(config, lineHeightArray, column, currentPosition, position);
+                    int skipPosition = tableInfo.getSeizeCellSize(column, position);
+                    currentPosition += skipPosition;
+                    /**
+                     *Todo 为了解决合并单元宽度过大问题
+                     */
+                    if (!isArrayColumn) {
+                        if(rangeCells !=null) {
+                            Cell cell = rangeCells[position][columnPos];
+                            if (cell != null) {
+                                if (cell.row != Cell.INVALID && cell.col != Cell.INVALID) {
+                                    cell.width = width;
+                                    width = width / cell.col;
+                                } else if (cell.realCell != null) {
+                                    width = cell.realCell.width / cell.realCell.col;
+                                }
 
+                            }
                         }
                     }
-                }
 
-                if (columnWidth < width) {
-                    columnWidth = width;
+                    if (columnWidth < width) {
+                        columnWidth = width;
+                    }
                 }
+                int width = (int) (Math.max(columnNameWidth,columnWidth + 2 * config.getHorizontalPadding()));
+                if(tableData.isShowCount()) {
+                    int totalCountWidth = column.getCountFormat() != null ?
+                            (int) paint.measureText(column.getTotalNumString()) : 0;
+                    width = Math.max(totalCountWidth+2*config.getHorizontalPadding(), width);
+                }
+                width = Math.max(column.getMinWidth(),width);
+                column.setComputeWidth(width);
+                contentWidth+=width;
+                columnPos++;
             }
-            int width = (int) (Math.max(columnNameWidth,columnWidth + 2 * config.getHorizontalPadding()));
-            if(tableData.isShowCount()) {
-                int totalCountWidth = column.getCountFormat() != null ?
-                        (int) paint.measureText(column.getTotalNumString()) : 0;
-                width = Math.max(totalCountWidth+2*config.getHorizontalPadding(), width);
-            }
-            width = Math.max(column.getMinWidth(),width);
-            column.setComputeWidth(width);
-            contentWidth+=width;
-            columnPos++;
         }
+
         int minWidth = config.getMinTableWidth();
         //计算出来的宽度大于最小宽度
         if(minWidth ==-1 || minWidth- totalWidth < contentWidth){
@@ -201,7 +211,7 @@ public class TableMeasurer<T> {
         }else{
             minWidth -=totalWidth;
             float widthScale = ((float) minWidth)/contentWidth;
-            for(Column column:tableData.getChildColumns()){
+            for(Column column: childColumns){
                 column.setComputeWidth((int)(widthScale*column.getComputeWidth()));
             }
             totalWidth+=minWidth;
