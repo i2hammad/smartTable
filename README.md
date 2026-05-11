@@ -1,9 +1,37 @@
-# SmartTable
+# SmartTable (i2hammad fork)
+
+This is a maintained fork of [huangyanbin/SmartTable](https://github.com/huangyanbin/SmartTable)
+published via JitPack so it can be consumed from modern Android projects.
+
 ```
- android自动生成表格框架
+ android 自动生成表格框架 / Android auto-generated table view
 ```
+
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![](https://jitpack.io/v/huangyanbin/smartTable.svg)](https://jitpack.io/#huangyanbin/smartTable)
+[![](https://jitpack.io/v/i2hammad/smartTable.svg)](https://jitpack.io/#i2hammad/smartTable)
+
+## Install (this fork)
+
+Add JitPack to your root `build.gradle` (or `settings.gradle` if using `RepositoriesMode.FAIL_ON_PROJECT_REPOS`):
+
+```gradle
+maven { url 'https://jitpack.io' }
+```
+
+Then add the dependency to your module `build.gradle`:
+
+```gradle
+dependencies {
+    implementation 'com.github.i2hammad:smartTable:1.0.0'
+}
+```
+
+Replace `1.0.0` with the latest tag from the
+[releases page](https://github.com/i2hammad/smartTable/releases).
+
+---
+
+## Original README
 * [English README](/README.en.md/)
 * [历史版本介绍](/README_old_version.md/)
 * [更多功能详情介绍](https://juejin.im/post/5a55ae6c5188257350511a8c)
