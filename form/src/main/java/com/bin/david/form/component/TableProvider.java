@@ -328,6 +328,10 @@ public class TableProvider<T> implements TableClickObserver {
                     realPosition+=skip;
                     float bottom = top + totalLineHeight*config.getZoom();
                     tempRect.set((int) left, (int) top, (int) right, (int) bottom);
+                    // Keep the selection rectangle in sync with the cell's current
+                    // zoomed bounds — otherwise the selection box stays where the
+                    // user originally tapped and drifts when the user pinch-zooms.
+                    operation.checkSelectedPoint(i, j, tempRect);
                     //矫正格子的大小 当前cell的格子区域就是temRect 绘制期间不改动
                     if (gridDrawer.correctCellRect(j, i, tempRect, config.getZoom()) != null) {
                     if (tempRect.top < showRect.bottom) {
