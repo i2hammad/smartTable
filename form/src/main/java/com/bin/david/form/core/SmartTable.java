@@ -276,13 +276,25 @@ public class SmartTable<T> extends View implements OnTableChangeListener {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    //long start = System.currentTimeMillis();
-                    parser.parse(tableData);
-                    TableInfo info = measurer.measure(tableData, config);
-                    xAxis.setHeight(info.getTopHeight());
-                    yAxis.setWidth(info.getyAxisWidth());
-                    requestReMeasure();
-                    isNotifying.set(false);
+                    try {
+                        //long start = System.currentTimeMillis();
+                        if (tableData == null || parser == null || measurer == null) {
+                            return;
+                        }
+                        parser.parse(tableData);
+                        if (measurer == null || tableData == null) return;
+                        TableInfo info = measurer.measure(tableData, config);
+                        // The view may have been detached / released while this
+                        // background measure was running — guard the axes before
+                        // dereferencing them.
+                        if (xAxis != null) xAxis.setHeight(info.getTopHeight());
+                        if (yAxis != null) yAxis.setWidth(info.getyAxisWidth());
+                        requestReMeasure();
+                    } catch (NullPointerException npe) {
+                        // SmartTable was released mid-measure; nothing to render.
+                    } finally {
+                        isNotifying.set(false);
+                    }
 //                    TODO: 重置provider的 tipColumn clickColumnInfo operation
                     postDelayed(new Runnable() {
                         @Override
