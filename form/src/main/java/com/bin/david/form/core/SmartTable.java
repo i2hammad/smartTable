@@ -61,6 +61,18 @@ public class SmartTable<T> extends View implements OnTableChangeListener {
     protected boolean isExactly = true; //是否是测量精准模式
     protected AtomicBoolean isNotifying = new AtomicBoolean(false); //是否正在更新数据
     private boolean isYSequenceRight;
+    /**
+     * Optional callback fired on the main thread after notifyDataChanged()'s background
+     * measure pass completes. Consumers use this to defer revealing the table (e.g. hiding
+     * a loading overlay) until SmartTable has measured and is about to paint with data.
+     */
+    public interface OnMeasureFinishListener {
+        void onMeasureFinish();
+    }
+    private OnMeasureFinishListener onMeasureFinishListener;
+    public void setOnMeasureFinishListener(OnMeasureFinishListener listener) {
+        this.onMeasureFinishListener = listener;
+    }
 
     public void setDrawOver(IDrawOver drawOver) {
         this.drawOver = drawOver;
@@ -302,6 +314,9 @@ public class SmartTable<T> extends View implements OnTableChangeListener {
                             if (provider != null) {
                                 provider.reset();
                                 postInvalidate();
+                            }
+                            if (onMeasureFinishListener != null) {
+                                onMeasureFinishListener.onMeasureFinish();
                             }
                         }
                     }, 0);
